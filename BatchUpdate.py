@@ -11,7 +11,6 @@
 
 #Importing modules
 import arcpy
-##import os
 
 #Setting up workspace
 ##arcpy.env.workspace = r"C:\Users\msgis-student\Documents\Quartic solutions\Batch Processing\Batch Processing.gdb"
@@ -30,7 +29,6 @@ field_is_nullable = "NON_NULLABLE "
 field_is_required = "REQUIRED"
 
 #Adding New Field
-
 try:
     arcpy.AddField_management (input_table, field_name, field_type, field_length)
     print field_name + " field was added successfully!"
