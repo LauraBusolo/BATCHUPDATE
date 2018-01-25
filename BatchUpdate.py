@@ -33,7 +33,6 @@ def copy_features(input_table, out_feature_class):
         print err.message
         print ("Error occurred while copying feature(s)\n")
 
-
 #(Specify Query) Check table and access rows with the input Batch ID as 1:
 cursor = arcpy.da.SearchCursor(lyrUpdate_table, field_names, "\"BatchID\" = "+ str(batch_Num))
 
@@ -57,7 +56,7 @@ with arcpy.da.SearchCursor(lyrUpdate_table, field_names) as cursor:
 
 #If Batch_ID == 1, execute copy features function
 
-# Call the Copy features function
+
 
 """
 - Add print statements, to show the steps, methods...
