@@ -9,10 +9,10 @@
 import arcpy
 
 print ("Setting up workspace...\n")
-arcpy.env.workspace = r"C:\Users\msgis-student\Documents\Quartic solutions\Batch Processing\Batch Processing.gdb"
+arcpy.env.workspace = r".\Batch Processing.gdb"
 arcpy.overwriteOutput = True
 #Setting up global variables
-lyrUpdate_table = r"C:\Users\msgis-student\Documents\Quartic solutions\Batch Processing\Batch Processing.gdb\Layer_Update"
+lyrUpdate_table = r".\Batch Processing.gdb\Layer_Update"
 field_names = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method']
 batch_Num = raw_input ("Please enter Batch ID: ")
 
@@ -33,28 +33,36 @@ def copy_features(input_table, out_feature_class):
         print err.message
         print ("Error occurred while copying feature(s)\n")
 
-#(Specify Query) Check table and access rows with the input Batch ID as 1:
-cursor = arcpy.da.SearchCursor(lyrUpdate_table, field_names, "\"BatchID\" = "+ str(batch_Num))
+#(Specify Query) Check table and access rows with the input Batch ID as 1,2...n:
 
-print ("Checking the table rows using the Search cursor...\n")
-with arcpy.da.SearchCursor(lyrUpdate_table, field_names) as cursor:
-
-    for row in cursor:
+def iterate_update_table(table_Lyr, flds, btch_num):
+    print ("Checking the table rows using the Search cursor...\n")
+    with arcpy.da.SearchCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
+    #print ("number of records {0} {1}".format(len(cursor), "for copying"))
+    
+        for row in cursor:
         #a = row.getValue("Batch_ID")
         #Access the data using indices, e.g BatchID's index is 0.
 ##        a = row [0]
-##        print row
-        #Setting up the row/field name variables...
-        batch_id, source_path, source_name, target_path, target_name, method= row
-        print ("C is the "+ target_path)
+            print row  
+            #Setting up the row/field name variables...
+            batch_id, source_path, source_name, target_path, target_name, method= row
+            print ("C is the "+ target_path)
 
-        #Access data using tuple logic
-        print ("Executing the copy features function...\n")
-        copy_features(source_path + '\\' + source_name, target_name)
-        print ("Successfully copied features_o_ _o_ _o_")
+            #Access data using tuple logic
+            
+            if batch_id == int(btch_num):
+                print ("Executing the copy features function...\n")
+                copy_features(source_path + '\\' + source_name, target_name)
+                print ("Successfully copied features_o_ _o_ _o_")
+        else:
+            print ("The Batch ID you entered does not exist. Please try again.")
+                
+            
 
 
-#If Batch_ID == 1, execute copy features function
+
+    #If Batch_ID == 1, execute copy features function
 
 
 
