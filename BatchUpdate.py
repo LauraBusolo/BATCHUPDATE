@@ -7,66 +7,72 @@
 #-------------------------------------------------------------------------------
 #Importing modules
 import arcpy
+import os
 
 print ("Setting up workspace...\n")
 arcpy.env.workspace = r".\Batch Processing.gdb"
 arcpy.overwriteOutput = True
 #Setting up global variables
-lyrUpdate_table = r".\Batch Processing.gdb\Layer_Update"
-field_names = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method']
-batch_Num = raw_input ("Please enter Batch ID: ")
+LYR_UPDATE_TABLE = r".\Batch Processing.gdb\Layer_Update"
+FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method']
 
 #Define the copy features function
 def copy_features(input_table, out_feature_class):
-##    print (input_table)
-##    print (out_feature_class)
     print ("Checking if feature(s) exist in the database...\n")
     try:
         if arcpy.Exists(out_feature_class):
             arcpy.Delete_management(out_feature_class)
 
-#Methods for updating, e.g. Copy Features, Feature class conversion
-        print ("Copying features...\n")
+        # Methods for updating, e.g. Copy Features, Feature class conversion
+
         arcpy.CopyFeatures_management (input_table, out_feature_class)
+        print ("Copying features...\n")
         print ("Copy Features Complete!\n")
     except Exception as err:
         print err.message
         print ("Error occurred while copying feature(s)\n")
 
-#(Specify Query) Check table and access rows with the input Batch ID as 1,2...n:
 
+#(Specify Query) Check table and access rows with the input Batch ID as 1,2...n:
 def iterate_update_table(table_Lyr, flds, btch_num):
+    process_success = False
+
     print ("Checking the table rows using the Search cursor...\n")
     with arcpy.da.SearchCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
-    #print ("number of records {0} {1}".format(len(cursor), "for copying"))
-    
+
         for row in cursor:
-        #a = row.getValue("Batch_ID")
-        #Access the data using indices, e.g BatchID's index is 0.
-##        a = row [0]
-            print row  
+            #print row
             #Setting up the row/field name variables...
             batch_id, source_path, source_name, target_path, target_name, method= row
-            print ("C is the "+ target_path)
+            print ("This, "+ target_path + (" is the target path"))
 
             #Access data using tuple logic
-            
             if batch_id == int(btch_num):
                 print ("Executing the copy features function...\n")
                 copy_features(source_path + '\\' + source_name, target_name)
                 print ("Successfully copied features_o_ _o_ _o_")
+                process_success = True
+            else:
+                print ("The Batch ID you entered does not exist. Please try again.")
+                process_success = False
+
+    return process_success
+
+# ------ APPLICATION MAIN ------
+
+if __name__ == '__main__':
+    count = 0
+    while True:
+        count +=1
+
+        batch_Num = raw_input ("Please enter a valid Batch ID: ")
+        success = iterate_update_table(LYR_UPDATE_TABLE, FIELD_NAMES, batch_Num)
+
+        if (success):
+            break
+        elif count == 3:
+            break
         else:
-            print ("The Batch ID you entered does not exist. Please try again.")
-                
-            
+            print("invalid entry")
 
-
-
-    #If Batch_ID == 1, execute copy features function
-
-
-
-"""
-- Add print statements, to show the steps, methods...
-- try adding more records to the table.
-"""
+    print("yay! completed!")
