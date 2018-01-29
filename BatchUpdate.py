@@ -1,6 +1,6 @@
 # Name:        Batch Processing
 # Purpose:
-"""Create field to shp or fc, then Copy/Update feature class/shp to a different source/fgdb
+"""Use an update table as a directory for source and target data. Then use a batch ID to Copy/Update feature class/shapefiles to a different source/fgdb
 """
 
 # Author:      Laura
@@ -24,7 +24,6 @@ def copy_features(input_table, out_feature_class):
             arcpy.Delete_management(out_feature_class)
 
         # Methods for updating, e.g. Copy Features, Feature class conversion
-
         arcpy.CopyFeatures_management (input_table, out_feature_class)
         print ("Copying features...\n")
         print ("Copy Features Complete!\n")
@@ -42,7 +41,7 @@ def iterate_update_table(table_Lyr, flds, btch_num):
 
         for row in cursor:
             #print row
-            #Setting up the row/field name variables...
+            #Setting up the row/field name variables, e.g. batch_id is BatchID...
             batch_id, source_path, source_name, target_path, target_name, method= row
             print ("This, "+ target_path + (" is the target path"))
 
@@ -62,6 +61,7 @@ def iterate_update_table(table_Lyr, flds, btch_num):
 
 if __name__ == '__main__':
     count = 0
+    #loop through the process 3 times to check whether the user's batch id input exists. Afterwhich, the script exists
     while True:
         count +=1
 
