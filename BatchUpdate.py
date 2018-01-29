@@ -27,7 +27,7 @@ FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName'
         #batch_id, source_path, source_name, target_path, target_name, method, last_update= row
         #if batch_id == int(btch_num):
             #Update the LastUpdate field with the date of the copy features-update
-            #"""row [6] = (Not sure how to calculate/update the date)"""
+            #"""row [6] = (...how to calculate/update the date)"""
             #dt_cursor.updateRow(row) 
             #dt_cursor.updateRow([datetime.date.today()])
             #print ('date Update Success!')
