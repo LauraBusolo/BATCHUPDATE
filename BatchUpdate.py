@@ -14,7 +14,9 @@ arcpy.env.workspace = r".\Batch Processing.gdb"
 arcpy.overwriteOutput = True
 #Setting up global variables
 LYR_UPDATE_TABLE = r".\Batch Processing.gdb\Layer_Update"
-FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method']
+FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method', 'LastUpdate']
+
+
 
 #Define the copy features function
 def copy_features(input_table, out_feature_class):
@@ -42,7 +44,7 @@ def iterate_update_table(table_Lyr, flds, btch_num):
         for row in cursor:
             #print row
             #Setting up the row/field name variables, e.g. batch_id is BatchID...
-            batch_id, source_path, source_name, target_path, target_name, method= row
+            batch_id, source_path, source_name, target_path, target_name, method, last_update= row
             print ("This, "+ target_path + (" is the target path"))
 
             #Access data using tuple logic
