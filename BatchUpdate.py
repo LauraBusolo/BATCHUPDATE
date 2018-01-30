@@ -17,26 +17,9 @@ arcpy.overwriteOutput = True
 LYR_UPDATE_TABLE = r".\Batch Processing.gdb\Layer_Update"
 FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method', 'LastUpdate']
 
-
-
-#print (FIELD_NAMES[6])
-#btch_num = raw_input ("Please enter a valid Batch ID: ")
-
-#with arcpy.da.UpdateCursor (LYR_UPDATE_TABLE, FIELD_NAMES[6]) as dt_cursor:
-    #for row in dt_cursor:
-        #batch_id, source_path, source_name, target_path, target_name, method, last_update= row
-        #if batch_id == int(btch_num):
-            #Update the LastUpdate field with the date of the copy features-update
-            #"""row [6] = (...how to calculate/update the date)"""
-            #dt_cursor.updateRow(row) 
-            #dt_cursor.updateRow([datetime.date.today()])
-            #print ('date Update Success!')
-
-           ##del dt_cursor
-
-
-
-
+#A count of features in the destination and source. If source count doesn't differ by more than 20%
+#Test copy feature dataset
+#Target Name- always uppercase 
 
 #Define the copy features function
 def copy_features(input_table, out_feature_class):
@@ -59,7 +42,7 @@ def iterate_update_table(table_Lyr, flds, btch_num):
     process_success = False
 
     print ("Checking the table rows using the Search cursor...\n")
-    with arcpy.da.SearchCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
+    with arcpy.da.UpdateCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
 
         for row in cursor:
             #print row
@@ -73,6 +56,12 @@ def iterate_update_table(table_Lyr, flds, btch_num):
                 copy_features(source_path + '\\' + source_name, target_name)
                 print ("Successfully copied features_o_ _o_ _o_")
                 process_success = True
+
+                #Update the current date of the features copied
+                row [6] = datetime.datetime.strftime(datetime.date.today(),"%Y-%m-%d")
+                cursor.updateRow(row)
+
+                print ("Success!")
             else:
                 print ("The Batch ID you entered does not exist. Please try again.")
                 process_success = False
