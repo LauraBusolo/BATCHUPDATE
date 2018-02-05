@@ -17,10 +17,6 @@ arcpy.overwriteOutput = True
 LYR_UPDATE_TABLE = r".\Batch Processing.gdb\Layer_Update"
 FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method', 'LastUpdate']
 
-#A count of features in the destination and source. If source count doesn't differ by more than 20%
-#Test copy feature dataset
-#Target Name- always uppercase 
-
 #Define the copy features function
 def copy_features(input_table, out_feature_class):
     print ("Checking if feature(s) exist in the database...\n")
@@ -36,7 +32,6 @@ def copy_features(input_table, out_feature_class):
         print err.message
         print ("Error occurred while copying feature(s)\n")
 
-
 #(Specify Query) Check table and access rows with the input Batch ID as 1,2...n:
 def iterate_update_table(table_Lyr, flds, btch_num):
     process_success = False
@@ -45,10 +40,34 @@ def iterate_update_table(table_Lyr, flds, btch_num):
     with arcpy.da.UpdateCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
 
         for row in cursor:
-            #print row
             #Setting up the row/field name variables, e.g. batch_id is BatchID...
             batch_id, source_path, source_name, target_path, target_name, method, last_update= row
             print ("This, "+ target_path + (" is the target path"))
+
+# #-----------------Testing the copy feature dataset code------------
+#             #Copy Feature dataset- features
+#             try:
+#             #if batchid == 4----------#testing with batch ID 4 since it is a feature dataset
+#                 if arcpy.Exists(source_name):
+#                     arcpy.Delete_management(source_name)
+#                 elif batch_id == int(btch_num):
+#                     ds = arcpy.ListFeatureClasses('','', source_name)
+#                     for fc in ds:
+#                         print ('These features') + (fc) + (' are in the feature dataset!')
+#                         arcpy.CopyFeatures_management(fc, os.path.join(target_path, os.path.splitext(fc)[0]))
+#             except Exception as dt_err:
+#                 print ("Sorry! did not copy features in dataset.")
+#                 print (dt_err)
+
+#             # if batch_id == 4:
+#             if batch_id == int(btch_num):
+#                 ds = arcpy.ListFeatureClasses('','', source_name)
+#                 for i in ds:
+#                     arcpy.CopyFeatures_management(
+#                     #i, os.path.join(r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\Batch Processing.gdb", os.path.splitext(i)[0]))
+#                     i, os.path.join(target_path, os.path.splitext(i)[0]))
+# #-----------------------end of test-----------------
+
 
             #Access data using tuple logic
             if batch_id == int(btch_num):
