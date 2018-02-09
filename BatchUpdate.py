@@ -17,12 +17,23 @@ arcpy.overwriteOutput = True
 LYR_UPDATE_TABLE = r".\Batch Processing.gdb\Layer_Update"
 FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method', 'LastUpdate']
 
+#opening a dataset in target GDB
+BackupSHPs = r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\BackupSHPs"
+out_dataset_path = r".\Batch Processing.gdb"
+out_nameFD = "newFD"
+sr = r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\Test Data\test1.gdb\SanTest\SDiegoCity_1"
+
+
 #Define the copy features function
 def copy_features(input_table, out_feature_class):
     print ("Checking if feature(s) exist in the database...\n")
     try:
         if arcpy.Exists(out_feature_class):
             arcpy.Delete_management(out_feature_class)
+
+        # Execute CreateFeaturedataset
+        if not arcpy.Exists(out_nameFD):
+            arcpy.CreateFeatureDataset_management(out_dataset_path, out_nameFD, sr)
 
         # Methods for updating, e.g. Copy Features, Feature class conversion
         arcpy.CopyFeatures_management (input_table, out_feature_class)
@@ -36,6 +47,14 @@ def copy_features(input_table, out_feature_class):
 def iterate_update_table(table_Lyr, flds, btch_num):
     process_success = False
 
+    # ********
+    dirr = os.getcwd()
+    if not os.path.exists(dirr + '\\backupShps'):
+        os.mkdir(dirr + '\\backupShps')
+
+    # ***********
+
+
     print ("Checking the table rows using the Search cursor...\n")
     with arcpy.da.UpdateCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
 
@@ -44,35 +63,36 @@ def iterate_update_table(table_Lyr, flds, btch_num):
             batch_id, source_path, source_name, target_path, target_name, method, last_update= row
             print ("This, "+ target_path + (" is the target path"))
 
-# #-----------------Testing the copy feature dataset code------------
-#             #Copy Feature dataset- features
-#             try:
-#             #if batchid == 4----------#testing with batch ID 4 since it is a feature dataset
-#                 if arcpy.Exists(source_name):
-#                     arcpy.Delete_management(source_name)
-#                 elif batch_id == int(btch_num):
-#                     ds = arcpy.ListFeatureClasses('','', source_name)
-#                     for fc in ds:
-#                         print ('These features') + (fc) + (' are in the feature dataset!')
-#                         arcpy.CopyFeatures_management(fc, os.path.join(target_path, os.path.splitext(fc)[0]))
-#             except Exception as dt_err:
-#                 print ("Sorry! did not copy features in dataset.")
-#                 print (dt_err)
+#-----------------Testing the copy feature dataset code------------
+            # #Copy Feature dataset- features
+            # #try:
+            # #if batchid == 4----------#testing with batch ID 4 since it is a feature dataset
+            # if batch_id == int(btch_num):
+            #     ds = arcpy.ListFeatureClasses('','', source_name)
+            #     for fc in ds:
+            #         print ('These features') + str(fc) + (' are in the feature dataset!')
+            #         arcpy.CopyFeatures_management(fc, os.path.join(target_path, os.path.splitext(fc)[0]))
 
-#             # if batch_id == 4:
-#             if batch_id == int(btch_num):
-#                 ds = arcpy.ListFeatureClasses('','', source_name)
-#                 for i in ds:
-#                     arcpy.CopyFeatures_management(
-#                     #i, os.path.join(r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\Batch Processing.gdb", os.path.splitext(i)[0]))
-#                     i, os.path.join(target_path, os.path.splitext(i)[0]))
-# #-----------------------end of test-----------------
-
+            # # if batch_id == 4:
+            # if batch_id == int(btch_num):
+            #     ds = arcpy.ListFeatureClasses('','', source_name)
+            #     for i in ds:
+            #         arcpy.CopyFeatures_management(
+            #         #i, os.path.join(r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\Batch Processing.gdb", os.path.splitext(i)[0]))
+            #         i, os.path.join(target_path, os.path.splitext(i)[0]))
+#-----------------------end of test-----------------
 
             #Access data using tuple logic
             if batch_id == int(btch_num):
                 print ("Executing the copy features function...\n")
                 copy_features(source_path + '\\' + source_name, target_name)
+
+                #-------------------
+                copy_features(source_path + '\\' + source_name, BackupSHPs + '\\' + target_name)
+
+                #-------------------------------
+
+
                 print ("Successfully copied features_o_ _o_ _o_")
                 process_success = True
 
