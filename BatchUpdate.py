@@ -1,8 +1,10 @@
-# Name:        Batch Processing
+# Name: Batch Processing
 # Purpose:
-"""Use an update table as a directory for source and target data. Then use a batch ID to Copy/Update feature class/shapefiles to a different source/fgdb
 """
-
+    Use an update table as a directory for source and target data.
+    Then use a batch ID to Copy feature classes/shapefiles to a different source/fgdb
+    Get the count of features in the source and target file, checking if the difference is >20%
+"""
 # Author:      Laura
 #-------------------------------------------------------------------------------
 #Importing modules
@@ -13,11 +15,13 @@ import datetime
 print ("Setting up workspace...\n")
 arcpy.env.workspace = r".\Batch Processing.gdb"
 arcpy.overwriteOutput = True
+
 #Setting up global variables
 LYR_UPDATE_TABLE = r".\Batch Processing.gdb\Layer_Update"
 FIELD_NAMES = ['BatchID', 'SourcePath', 'SourceName', 'TargetPath', 'TargetName', 'Method', 'LastUpdate']
 
 #opening a dataset in target GDB
+outt = r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\backupShps"
 out_dataset_path = r".\Batch Processing.gdb"
 out_nameFD = "newFD"
 CoordSys = r"C:\Users\Laura\Documents\Quartic solutions\Batch Processing\Test Data\test1.gdb\SanTest\SDiegoCity_1"
@@ -29,23 +33,22 @@ def copy_features(input_table, out_feature_class):
         if arcpy.Exists(out_feature_class):
             arcpy.Delete_management(out_feature_class)
 
-        # Execute CreateFeaturedataset
-        ##Not necessary
-        #if not arcpy.Exists(out_nameFD):
-            #arcpy.CreateFeatureDataset_management(out_dataset_path, out_nameFD, CoordSys)
+        # creating a new Feature dataset, "newFD", if it doesn't exist
+        if not arcpy.Exists(out_nameFD):
+            arcpy.CreateFeatureDataset_management(out_dataset_path, out_nameFD, CoordSys)
 
         # Methods for updating, e.g. Copy Features, Feature class conversion
-        arcpy.CopyFeatures_management (input_table, out_feature_class)
+        arcpy.CopyFeatures_management(input_table, out_feature_class)
         print ("Copying features...\n")
         print ("Copy Features Complete!\n")
     except Exception as err:
         print err.message
         print ("Error occurred while copying feature(s)\n")
 
-
+#Define the count features function
 def countRows(input_table, out_feature_class):
-    print ("Executing the countRows ...\n")
-    print ("Source data: input_table, Copied/target data: out_feature_class : " + input_table + ", " + out_feature_class)
+    print ("Counting the rows ...\n")
+    print ("Source data: " + input_table + ", Copied/target data: " + out_feature_class)
     rows = arcpy.SearchCursor(input_table)
     row = rows.next()
     #input_table_result is the source data
@@ -53,19 +56,19 @@ def countRows(input_table, out_feature_class):
     while row:
         input_table_result += 1
         row = rows.next()
-    print ("Source data, i.e. input_table_result count is " + str(input_table_result) + "\n")
+    print ("There are " + str(input_table_result) + " features in the source data\n")
     rows2 = arcpy.SearchCursor(out_feature_class)
     row2 = rows2.next()
-    #out_feature_class_result is the target
+    #out_feature_class_result is the target data
     out_feature_class_result = 0
     while row2:
         out_feature_class_result += 1
         row2 = rows2.next()
-    print ("Copied/target data, i.e. out_feature_class_result count is " + str(out_feature_class_result) + "\n")
+    print ("There are " + str(out_feature_class_result) + " features in the Copied/target data\n")
 
-    Result_Difference = int(input_table_result) - int(out_feature_class_result)
-    Result_Ratio = (Result_Difference / out_feature_class_result) * 100
-    if (Result_Ratio < 20.00):
+    result_difference = int(input_table_result) - int(out_feature_class_result)
+    result_ratio = (result_difference / out_feature_class_result) * 100
+    if result_ratio < 20.00:
 
         print ("Not much changes")
     else:
@@ -76,13 +79,10 @@ def countRows(input_table, out_feature_class):
 def iterate_update_table(table_Lyr, flds, btch_num):
     process_success = False
 
-    # ********
+    #Check in the current working directory to see if the backupShps folder exists. If not, create it.
     dirr = os.getcwd()
     if not os.path.exists(dirr + '\\backupShps'):
         os.mkdir(dirr + '\\backupShps')
-
-    # ***********
-
 
     print ("Checking the table rows using the Search cursor...\n")
     with arcpy.da.UpdateCursor(table_Lyr, flds, "\"BatchID\" = "+ str(btch_num)) as cursor:
@@ -101,6 +101,8 @@ def iterate_update_table(table_Lyr, flds, btch_num):
 
                 print ("Executing the copy features function...\n")
                 copy_features(source_path + '\\' + source_name, target_name)
+                #copy the copied data into a folder called backupShps, to be used later to compare data counts between the source and destination.
+                copy_features(source_path + '\\' + source_name, outt + '\\' + target_name + ".shp")
 
                 print ("Successfully copied features_o_ _o_ _o_")
                 process_success = True
@@ -122,12 +124,12 @@ if __name__ == '__main__':
     count = 0
     #loop through the process 3 times to check whether the user's batch id input exists. Afterwhich, the script exists
     while True:
-        count +=1
+        count += 1
 
         batch_Num = raw_input ("Please enter a valid Batch ID: ")
         success = iterate_update_table(LYR_UPDATE_TABLE, FIELD_NAMES, batch_Num)
 
-        if (success):
+        if success:
             break
         elif count == 3:
             break
