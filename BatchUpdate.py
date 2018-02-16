@@ -31,8 +31,8 @@ def copy_features(input_table, out_feature_class):
 
         # Execute CreateFeaturedataset
         ##Not necessary
-        if not arcpy.Exists(out_nameFD):
-            arcpy.CreateFeatureDataset_management(out_dataset_path, out_nameFD, CoordSys)
+        #if not arcpy.Exists(out_nameFD):
+            #arcpy.CreateFeatureDataset_management(out_dataset_path, out_nameFD, CoordSys)
 
         # Methods for updating, e.g. Copy Features, Feature class conversion
         arcpy.CopyFeatures_management (input_table, out_feature_class)
